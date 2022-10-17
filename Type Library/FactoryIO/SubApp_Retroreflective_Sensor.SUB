@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SubAppType Name="SubApp_Retroreflective_Sensor" Comment="Subapplication Type">
+	<Identification Standard="61499-2">
+	</Identification>
+	<VersionInfo Version="1.0" Author="AK123957" Date="2022-10-10">
+	</VersionInfo>
+	<SubAppInterfaceList>
+		<SubAppEventInputs>
+			<SubAppEvent Name="INIT" Type="Event" Comment="">
+			</SubAppEvent>
+		</SubAppEventInputs>
+		<SubAppEventOutputs>
+			<SubAppEvent Name="OBJECT_ARRIVED" Type="Event" Comment="">
+			</SubAppEvent>
+			<SubAppEvent Name="OBJECT_LEFT" Type="Event" Comment="">
+			</SubAppEvent>
+		</SubAppEventOutputs>
+		<InputVars>
+			<VarDeclaration Name="QI" Type="BOOL" Comment=""/>
+			<VarDeclaration Name="SENSOR_ID" Type="WSTRING" Comment=""/>
+		</InputVars>
+	</SubAppInterfaceList>
+	<SubAppNetwork>
+		<FB Name="Object_left" Type="E_R_TRIG" Comment="" x="2666.666666666667" y="1333.3333333333335">
+		</FB>
+		<FB Name="Read_Sensor_Data" Type="SUBSCRIBE_1" Comment="" x="746.6666666666667" y="400.0">
+		</FB>
+		<FB Name="Object_arrived" Type="E_F_TRIG" Comment="" x="2666.666666666667" y="533.3333333333334">
+		</FB>
+		<FB Name="Count_from_second_event" Type="E_CTU" Comment="" x="4000.0" y="1066.6666666666667">
+			<Parameter Name="PV" Value="2"/>
+		</FB>
+		<FB Name="E_PERMIT" Type="E_PERMIT" Comment="" x="5200.0" y="1066.6666666666667">
+		</FB>
+		<EventConnections>
+			<Connection Source="Read_Sensor_Data.IND" Destination="Object_left.EI" Comment="" dx1="546.6666666666667"/>
+			<Connection Source="Read_Sensor_Data.IND" Destination="Object_arrived.EI" Comment="" dx1="546.6666666666667"/>
+			<Connection Source="INIT" Destination="Read_Sensor_Data.INIT" Comment="" dx1="873.3333333333334"/>
+			<Connection Source="Object_arrived.EO" Destination="OBJECT_ARRIVED" Comment="" dx1="353.33333333333337"/>
+			<Connection Source="Count_from_second_event.CUO" Destination="E_PERMIT.EI" Comment=""/>
+			<Connection Source="Object_left.EO" Destination="Count_from_second_event.CU" Comment="" dx1="320.0"/>
+			<Connection Source="E_PERMIT.EO" Destination="OBJECT_LEFT" Comment="" dx1="446.6666666666667"/>
+			<Connection Source="INIT" Destination="Count_from_second_event.R" Comment="" dx1="2800.0"/>
+		</EventConnections>
+		<DataConnections>
+			<Connection Source="Read_Sensor_Data.RD_1" Destination="Object_left.QI" Comment="" dx1="546.6666666666667"/>
+			<Connection Source="Read_Sensor_Data.RD_1" Destination="Object_arrived.QI" Comment="" dx1="546.6666666666667"/>
+			<Connection Source="QI" Destination="Read_Sensor_Data.QI" Comment="" dx1="873.3333333333334"/>
+			<Connection Source="SENSOR_ID" Destination="Read_Sensor_Data.ID" Comment="" dx1="873.3333333333334"/>
+			<Connection Source="Count_from_second_event.Q" Destination="E_PERMIT.PERMIT" Comment="" dx1="260.0"/>
+		</DataConnections>
+	</SubAppNetwork>
+</SubAppType>

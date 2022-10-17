@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FBType Name="FB_BOX_DETECTOR" Comment="Template for a Basic Function Block Type">
+	<Identification Standard="61499-2">
+	</Identification>
+	<VersionInfo Version="1.0" Author="AK123957" Date="2022-10-13">
+	</VersionInfo>
+	<InterfaceList>
+		<EventInputs>
+			<Event Name="EI1" Type="Event" Comment="Sensor Data Event">
+				<With Var="HIGH_SENSOR"/>
+				<With Var="LOW_SENSOR"/>
+			</Event>
+			<Event Name="RESET" Type="Event" Comment="Reset Event">
+			</Event>
+		</EventInputs>
+		<EventOutputs>
+			<Event Name="CNF" Type="Event" Comment="Execution Confirmation">
+				<With Var="BIG_BOX"/>
+				<With Var="SMALL_BOX"/>
+			</Event>
+		</EventOutputs>
+		<InputVars>
+			<VarDeclaration Name="HIGH_SENSOR" Type="BOOL" Comment="Input from High Sensor"/>
+			<VarDeclaration Name="LOW_SENSOR" Type="BOOL" Comment="Input from Low Sensor"/>
+		</InputVars>
+		<OutputVars>
+			<VarDeclaration Name="BIG_BOX" Type="BOOL" Comment="True if a Big Box is Detected"/>
+			<VarDeclaration Name="SMALL_BOX" Type="BOOL" Comment="True if a Small Box is Detected"/>
+		</OutputVars>
+	</InterfaceList>
+	<BasicFB>
+		<ECC>
+			<ECState Name="START" Comment="Initial State" x="473.33333333333337" y="1120.0">
+			</ECState>
+			<ECState Name="Big_Box" Comment="" x="1733.3333333333335" y="666.6666666666667">
+				<ECAction Algorithm="BIG" Output="CNF"/>
+			</ECState>
+			<ECState Name="Small_Box" Comment="" x="1600.0" y="1733.3333333333335">
+				<ECAction Algorithm="SMALL" Output="CNF"/>
+			</ECState>
+			<ECState Name="Reset" Comment="" x="3480.0" y="1006.6666666666667">
+				<ECAction Algorithm="RESET" Output="CNF"/>
+			</ECState>
+			<ECTransition Source="START" Destination="Big_Box" Condition="[HIGH_SENSOR = TRUE AND LOW_SENSOR = TRUE]" Comment="" x="1313.3333333333335" y="440.0"/>
+			<ECTransition Source="START" Destination="Small_Box" Condition="[HIGH_SENSOR = FALSE AND LOW_SENSOR = TRUE]" Comment="" x="1160.0" y="1526.6666666666667"/>
+			<ECTransition Source="Big_Box" Destination="Reset" Condition="RESET" Comment="" x="2653.3333333333335" y="873.3333333333334"/>
+			<ECTransition Source="Small_Box" Destination="Reset" Condition="RESET" Comment="" x="2633.3333333333335" y="1406.6666666666667"/>
+			<ECTransition Source="Reset" Destination="START" Condition="1" Comment="" x="2053.3333333333335" y="1120.0"/>
+		</ECC>
+		<Algorithm Name="BIG" Comment="">
+			<ST><![CDATA[BIG_BOX := TRUE;
+SMALL_BOX := FALSE;]]></ST>
+		</Algorithm>
+		<Algorithm Name="SMALL" Comment="">
+			<ST><![CDATA[BIG_BOX := FALSE;
+SMALL_BOX := TRUE;]]></ST>
+		</Algorithm>
+		<Algorithm Name="RESET" Comment="">
+			<ST><![CDATA[BIG_BOX:= FALSE;
+SMALL_BOX := FALSE;]]></ST>
+		</Algorithm>
+	</BasicFB>
+	<Service RightInterface="right interface" LeftInterface="left interface" Comment="Template for a Basic Function Block Type">
+		<ServiceSequence Name="Service Sequence" Comment="">
+			<ServiceTransaction>
+				<InputPrimitive Interface="left interface" Event=""/>
+			</ServiceTransaction>
+			<ServiceTransaction>
+				<InputPrimitive Interface="left interface" Event="EI1"/>
+			</ServiceTransaction>
+			<ServiceTransaction>
+				<InputPrimitive Interface="left interface" Event="EI1"/>
+			</ServiceTransaction>
+		</ServiceSequence>
+	</Service>
+</FBType>
