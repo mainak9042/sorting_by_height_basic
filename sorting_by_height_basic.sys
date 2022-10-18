@@ -2,7 +2,7 @@
 <System Name="sorting_by_height_basic" Comment="">
 	<VersionInfo Version="1.0" Author="AK123957" Date="2022-10-03">
 	</VersionInfo>
-	<Application Name="sorting_by_height_basicApp" Comment="">
+	<Application Name="sorting_by_height_basicApp_Kafka" Comment="">
 		<SubAppNetwork>
 			<SubApp Name="Entry_Conveyor" Comment="" x="13333.333333333334" y="4133.333333333334">
 				<SubAppInterfaceList>
@@ -263,9 +263,211 @@
 				<Connection Source="Get_Small_Box_Notification.IND" Destination="Transfer_Conveyor.SMALL_BOX" Comment="" dx1="80.0" dx2="80.0" dy="766.6666666666667"/>
 				<Connection Source="Transfer_Conveyor.CONVEYOR_EMPTY" Destination="Transfer_Conveyor_Status.REQ" Comment="" dx1="2266.666666666667"/>
 				<Connection Source="Get_Small_Box_Notification.INITO" Destination="Transfer_Conveyor_Status.INIT" Comment=""/>
-				<Connection Source="Get_Transfer_Conveyor_Status.IND" Destination="Entry_Conveyor.TRANSFER_CONV_EMPTY" Comment="" dx1="80.0" dx2="80.0" dy="-1340.0"/>
+				<Connection Source="Get_Transfer_Conveyor_Status.IND" Destination="Entry_Conveyor.TRANSFER_CONV_EMPTY" Comment="" dx1="320.0" dx2="80.0" dy="-1340.0"/>
 				<Connection Source="Small_Box_Notification.INITO" Destination="Get_Transfer_Conveyor_Status.INIT" Comment=""/>
 				<Connection Source="Get_Transfer_Conveyor_Status.INITO" Destination="Get_Pallet_Status.INIT" Comment="" dx1="80.0" dx2="80.0" dy="740.0"/>
+			</EventConnections>
+		</SubAppNetwork>
+	</Application>
+	<Application Name="sorting_by_height_basic_simple" Comment="">
+		<SubAppNetwork>
+			<SubApp Name="Right_Conveyor" Comment="" x="1466.6666666666667" y="2533.3333333333335">
+				<SubAppInterfaceList>
+					<SubAppEventInputs>
+						<SubAppEvent Name="INIT" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventInputs>
+					<SubAppEventOutputs>
+						<SubAppEvent Name="PALLET_IN_CONVEYOR" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventOutputs>
+				</SubAppInterfaceList>
+				<SubAppNetwork>
+					<SubApp Name="Read_at_right_entry_sensor" Type="SubApp_Retroreflective_Sensor" Comment="" x="800.0" y="1200.0">
+						<Parameter Name="QI" Value="1"/>
+						<Parameter Name="SENSOR_ID" Value="&quot;opc_ua[READ;/Objects/Machines/RightConveyor/FIO_iAtRightEntry,1:s=FIO_iAtRightEntry]&quot;"/>
+					</SubApp>
+					<EventConnections>
+						<Connection Source="INIT" Destination="Read_at_right_entry_sensor.INIT" Comment="" dx1="1066.6666666666667"/>
+						<Connection Source="Read_at_right_entry_sensor.OBJECT_LEFT" Destination="PALLET_IN_CONVEYOR" Comment="" dx1="1273.3333333333335"/>
+					</EventConnections>
+				</SubAppNetwork>
+			</SubApp>
+			<SubApp Name="Left_Conveyor" Comment="" x="1466.6666666666667" y="1466.6666666666667">
+				<SubAppInterfaceList>
+					<SubAppEventInputs>
+						<SubAppEvent Name="INIT" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventInputs>
+					<SubAppEventOutputs>
+						<SubAppEvent Name="PALLET_IN_CONVEYOR" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventOutputs>
+				</SubAppInterfaceList>
+				<SubAppNetwork>
+					<SubApp Name="Read_at_left_entry_sensor" Type="SubApp_Retroreflective_Sensor" Comment="" x="3333.3333333333335" y="1066.6666666666667">
+						<Parameter Name="QI" Value="1"/>
+						<Parameter Name="SENSOR_ID" Value="&quot;opc_ua[READ;/Objects/Machines/LeftConveyor/FIO_iAtLeftEntry,1:s=FIO_iAtLeftEntry]&quot;"/>
+					</SubApp>
+					<EventConnections>
+						<Connection Source="INIT" Destination="Read_at_left_entry_sensor.INIT" Comment="" dx1="1453.3333333333335"/>
+						<Connection Source="Read_at_left_entry_sensor.OBJECT_LEFT" Destination="PALLET_IN_CONVEYOR" Comment="" dx1="1566.6666666666667"/>
+					</EventConnections>
+				</SubAppNetwork>
+			</SubApp>
+			<SubApp Name="Entry_Conveyor" Comment="" x="4000.0" y="1333.3333333333335">
+				<SubAppInterfaceList>
+					<SubAppEventInputs>
+						<SubAppEvent Name="INIT" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="TRANSFER_CONV_EMPTY" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="TRANSFER_COMPLETE" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventInputs>
+					<SubAppEventOutputs>
+						<SubAppEvent Name="PALLET_AT_EXIT" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="BIG_BOX" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="SMALL_BOX" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventOutputs>
+				</SubAppInterfaceList>
+				<SubAppNetwork>
+					<FB Name="Entry_Motor_Control" Type="PUBLISH_1" Comment="" x="3400.0" y="-700.0">
+						<Parameter Name="QI" Value="True"/>
+						<Parameter Name="ID" Value="&quot;opc_ua[WRITE;/Objects/Machines/EntryConveyor/FIO_oEntryMotor,1:s=FIO_oEntryMotor]&quot;"/>
+					</FB>
+					<FB Name="E_SR" Type="E_SR" Comment="" x="2100.0" y="-340.0">
+					</FB>
+					<SubApp Name="Read_Pallet_Sensor" Type="SubApp_Proximity_Sensor" Comment="" x="-666.6666666666667" y="0.0">
+						<Parameter Name="QI" Value="True"/>
+						<Parameter Name="SENSOR_ID" Value="&quot;opc_ua[READ;/Objects/Machines/EntryConveyor/FIO_iPalletSensor,1:s=FIO_iPalletSensor]&quot;"/>
+					</SubApp>
+					<FB Name="Check_If_big_or_small_box" Type="FB_BOX_DETECTOR" Comment="" x="3066.666666666667" y="1333.3333333333335">
+					</FB>
+					<FB Name="Read_high_low_sensor" Type="SUBSCRIBE_2" Comment="" x="533.3333333333334" y="933.3333333333334">
+						<Parameter Name="QI" Value="1"/>
+						<Parameter Name="ID" Value="&quot;opc_ua[READ;/Objects/Machines/EntryConveyor/FIO_iHighSensor,1:s=FIO_iHighSensor;/Objects/Machines/EntryConveyor/FIO_iLowSensor,1:s=FIO_iLowSensor]&quot;"/>
+					</FB>
+					<FB Name="Big_box" Type="E_R_TRIG" Comment="" x="4933.333333333334" y="800.0">
+					</FB>
+					<FB Name="Small_box" Type="E_R_TRIG" Comment="" x="4933.333333333334" y="1600.0">
+					</FB>
+					<FB Name="E_REND" Type="E_REND" Comment="" x="900.0" y="-940.0">
+					</FB>
+					<EventConnections>
+						<Connection Source="E_SR.EO" Destination="Entry_Motor_Control.REQ" Comment="" dx1="380.0"/>
+						<Connection Source="Read_Pallet_Sensor.OBJECT_ARRIVED" Destination="PALLET_AT_EXIT" Comment="" dx1="60.0"/>
+						<Connection Source="INIT" Destination="Read_Pallet_Sensor.INIT" Comment="" dx1="1600.0"/>
+						<Connection Source="Read_high_low_sensor.IND" Destination="Check_If_big_or_small_box.EI1" Comment="" dx1="986.6666666666667"/>
+						<Connection Source="Read_Pallet_Sensor.OBJECT_ARRIVED" Destination="Check_If_big_or_small_box.RESET" Comment="" dx1="1120.0"/>
+						<Connection Source="Check_If_big_or_small_box.CNF" Destination="Big_box.EI" Comment="" dx1="420.0"/>
+						<Connection Source="Check_If_big_or_small_box.CNF" Destination="Small_box.EI" Comment="" dx1="513.3333333333334"/>
+						<Connection Source="Big_box.EO" Destination="BIG_BOX" Comment="" dx1="326.6666666666667"/>
+						<Connection Source="Small_box.EO" Destination="SMALL_BOX" Comment="" dx1="513.3333333333334"/>
+						<Connection Source="INIT" Destination="Read_high_low_sensor.INIT" Comment="" dx1="2266.666666666667"/>
+						<Connection Source="INIT" Destination="Entry_Motor_Control.INIT" Comment="" dx1="3740.0"/>
+						<Connection Source="Read_Pallet_Sensor.OBJECT_LEFT" Destination="E_SR.R" Comment="" dx1="753.3333333333334"/>
+						<Connection Source="TRANSFER_CONV_EMPTY" Destination="E_REND.EI1" Comment="" dx1="2453.3333333333335"/>
+						<Connection Source="TRANSFER_COMPLETE" Destination="E_REND.EI2" Comment="" dx1="2453.3333333333335"/>
+						<Connection Source="E_REND.EO" Destination="E_SR.S" Comment="" dx1="300.0"/>
+						<Connection Source="INIT" Destination="E_SR.S" Comment="" dx1="3053.3333333333335"/>
+					</EventConnections>
+					<DataConnections>
+						<Connection Source="E_SR.Q" Destination="Entry_Motor_Control.SD_1" Comment="" dx1="380.0"/>
+						<Connection Source="Read_high_low_sensor.RD_1" Destination="Check_If_big_or_small_box.HIGH_SENSOR" Comment="" dx1="986.6666666666667"/>
+						<Connection Source="Read_high_low_sensor.RD_2" Destination="Check_If_big_or_small_box.LOW_SENSOR" Comment="" dx1="986.6666666666667"/>
+						<Connection Source="Check_If_big_or_small_box.BIG_BOX" Destination="Big_box.QI" Comment="" dx1="420.0"/>
+						<Connection Source="Check_If_big_or_small_box.SMALL_BOX" Destination="Small_box.QI" Comment="" dx1="513.3333333333334"/>
+					</DataConnections>
+				</SubAppNetwork>
+			</SubApp>
+			<SubApp Name="Transfer_Conveyor" Comment="" x="4133.333333333334" y="2666.666666666667">
+				<SubAppInterfaceList>
+					<SubAppEventInputs>
+						<SubAppEvent Name="INIT" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="PALLET_ARRIVED" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="BIG_BOX" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="SMALL_BOX" Type="Event" Comment="">
+						</SubAppEvent>
+						<SubAppEvent Name="PALLET_TRANSFERED" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventInputs>
+					<SubAppEventOutputs>
+						<SubAppEvent Name="CONVEYOR_EMPTY" Type="Event" Comment="">
+						</SubAppEvent>
+					</SubAppEventOutputs>
+				</SubAppInterfaceList>
+				<SubAppNetwork>
+					<FB Name="Load_Motor" Type="PUBLISH_1" Comment="" x="-1100.0" y="1000.0">
+						<Parameter Name="QI" Value="1"/>
+						<Parameter Name="ID" Value="&quot;opc_ua[WRITE;/Objects/Machines/TransferConveyor/FIO_oLoad,1:s=FIO_oLoad]&quot;"/>
+					</FB>
+					<FB Name="E_SR" Type="E_SR" Comment="" x="-2160.0" y="1000.0">
+					</FB>
+					<FB Name="Transfer_Right" Type="PUBLISH_1" Comment="" x="-1100.0" y="2986.666666666667">
+						<Parameter Name="QI" Value="1"/>
+						<Parameter Name="ID" Value="&quot;opc_ua[WRITE;/Objects/Machines/TransferConveyor/FIO_oTransferRight,1:s=FIO_oTransferRight]&quot;"/>
+					</FB>
+					<FB Name="Transfer_Left" Type="PUBLISH_1" Comment="" x="-1100.0" y="2060.0">
+						<Parameter Name="QI" Value="1"/>
+						<Parameter Name="ID" Value="&quot;opc_ua[WRITE;/Objects/Machines/TransferConveyor/FIO_oTransferLeft,1:s=FIO_oTransferLeft]&quot;"/>
+					</FB>
+					<FB Name="E_REND" Type="E_REND" Comment="" x="-3066.666666666667" y="1466.6666666666667">
+					</FB>
+					<FB Name="E_SR_1" Type="E_SR" Comment="" x="-2160.0" y="1820.0">
+					</FB>
+					<FB Name="E_SR_2" Type="E_SR" Comment="" x="-2040.0" y="2880.0">
+					</FB>
+					<FB Name="E_REND_1" Type="E_REND" Comment="" x="-2933.3333333333335" y="2400.0">
+					</FB>
+					<SubApp Name="Read_loaded_sensor" Type="SubApp_Proximity_Sensor" Comment="" x="-4600.0" y="400.0">
+						<Parameter Name="QI" Value="True"/>
+						<Parameter Name="SENSOR_ID" Value="&quot;opc_ua[READ;/Objects/Machines/TransferConveyor/FIO_iLoaded,1:s=FIO_iLoaded]&quot;"/>
+					</SubApp>
+					<EventConnections>
+						<Connection Source="E_SR.EO" Destination="Load_Motor.REQ" Comment="" dx1="280.0"/>
+						<Connection Source="E_REND.EO" Destination="E_SR_1.S" Comment="" dx1="86.66666666666667"/>
+						<Connection Source="E_SR_1.EO" Destination="Transfer_Left.REQ" Comment="" dx1="280.0"/>
+						<Connection Source="E_SR_2.EO" Destination="Transfer_Right.REQ" Comment="" dx1="226.66666666666669"/>
+						<Connection Source="E_REND_1.EO" Destination="E_SR_2.S" Comment="" dx1="146.66666666666669"/>
+						<Connection Source="INIT" Destination="Read_loaded_sensor.INIT" Comment="" dx1="1200.0"/>
+						<Connection Source="Read_loaded_sensor.OBJECT_ARRIVED" Destination="E_SR.R" Comment="" dx1="520.0"/>
+						<Connection Source="INIT" Destination="Load_Motor.INIT" Comment="" dx1="5426.666666666667"/>
+						<Connection Source="PALLET_ARRIVED" Destination="E_SR.S" Comment="" dx1="4160.0"/>
+						<Connection Source="Read_loaded_sensor.OBJECT_LEFT" Destination="CONVEYOR_EMPTY" Comment="" dx1="2260.0"/>
+						<Connection Source="Read_loaded_sensor.OBJECT_ARRIVED" Destination="E_REND.EI1" Comment="" dx1="80.0" dx2="80.0" dy="533.3333333333334"/>
+						<Connection Source="BIG_BOX" Destination="E_REND.EI2" Comment="" dx1="1846.6666666666667"/>
+						<Connection Source="Read_loaded_sensor.OBJECT_ARRIVED" Destination="E_REND_1.EI1" Comment="" dx1="113.33333333333334"/>
+						<Connection Source="SMALL_BOX" Destination="E_REND_1.EI2" Comment="" dx1="1846.6666666666667"/>
+						<Connection Source="PALLET_TRANSFERED" Destination="E_SR_1.R" Comment="" dx1="1366.6666666666667"/>
+						<Connection Source="PALLET_TRANSFERED" Destination="E_SR_2.R" Comment="" dx1="1026.6666666666667"/>
+						<Connection Source="INIT" Destination="Transfer_Left.INIT" Comment="" dx1="2786.666666666667"/>
+						<Connection Source="INIT" Destination="Transfer_Right.INIT" Comment="" dx1="2786.666666666667"/>
+						<Connection Source="Read_loaded_sensor.OBJECT_LEFT" Destination="E_REND.R" Comment="" dx1="80.0" dx2="80.0" dy="580.0"/>
+						<Connection Source="Read_loaded_sensor.OBJECT_LEFT" Destination="E_REND_1.R" Comment="" dx1="140.0"/>
+					</EventConnections>
+					<DataConnections>
+						<Connection Source="E_SR.Q" Destination="Load_Motor.SD_1" Comment="" dx1="280.0"/>
+						<Connection Source="E_SR_1.Q" Destination="Transfer_Left.SD_1" Comment="" dx1="280.0"/>
+						<Connection Source="E_SR_2.Q" Destination="Transfer_Right.SD_1" Comment="" dx1="226.66666666666669"/>
+					</DataConnections>
+				</SubAppNetwork>
+			</SubApp>
+			<EventConnections>
+				<Connection Source="Left_Conveyor.PALLET_IN_CONVEYOR" Destination="Entry_Conveyor.TRANSFER_COMPLETE" Comment="" dx1="673.3333333333334"/>
+				<Connection Source="Left_Conveyor.PALLET_IN_CONVEYOR" Destination="Transfer_Conveyor.PALLET_TRANSFERED" Comment="" dx1="740.0"/>
+				<Connection Source="Right_Conveyor.PALLET_IN_CONVEYOR" Destination="Entry_Conveyor.TRANSFER_COMPLETE" Comment="" dx1="673.3333333333334"/>
+				<Connection Source="Right_Conveyor.PALLET_IN_CONVEYOR" Destination="Transfer_Conveyor.PALLET_TRANSFERED" Comment="" dx1="740.0"/>
+				<Connection Source="Entry_Conveyor.PALLET_AT_EXIT" Destination="Transfer_Conveyor.PALLET_ARRIVED" Comment="" dx1="80.0" dx2="80.0" dy="713.3333333333334"/>
+				<Connection Source="Entry_Conveyor.BIG_BOX" Destination="Transfer_Conveyor.BIG_BOX" Comment="" dx1="80.0" dx2="80.0" dy="713.3333333333334"/>
+				<Connection Source="Entry_Conveyor.SMALL_BOX" Destination="Transfer_Conveyor.SMALL_BOX" Comment="" dx1="80.0" dx2="80.0" dy="713.3333333333334"/>
+				<Connection Source="Transfer_Conveyor.CONVEYOR_EMPTY" Destination="Entry_Conveyor.TRANSFER_CONV_EMPTY" Comment="" dx1="80.0" dx2="80.0" dy="-613.3333333333334"/>
 			</EventConnections>
 		</SubAppNetwork>
 	</Application>
@@ -275,7 +477,31 @@
 		<Attribute Name="Color" Type="STRING" Value="190,54,200" Comment="color"/>
 		<Resource Name="EMB_RES" Type="EMB_RES" Comment="" x="0.0" y="0.0">
 			<FBNetwork>
-				<SubApp Name="Transfer_Conveyor" Comment="" x="2133.3333333333335" y="666.6666666666667">
+				<SubApp Name="Left_Conveyor" Comment="" x="1466.6666666666667" y="1466.6666666666667">
+					<SubAppInterfaceList>
+						<SubAppEventInputs>
+							<SubAppEvent Name="INIT" Type="Event" Comment="">
+							</SubAppEvent>
+						</SubAppEventInputs>
+						<SubAppEventOutputs>
+							<SubAppEvent Name="PALLET_IN_CONVEYOR" Type="Event" Comment="">
+							</SubAppEvent>
+						</SubAppEventOutputs>
+					</SubAppInterfaceList>
+				</SubApp>
+				<SubApp Name="Right_Conveyor" Comment="" x="1466.6666666666667" y="2533.3333333333335">
+					<SubAppInterfaceList>
+						<SubAppEventInputs>
+							<SubAppEvent Name="INIT" Type="Event" Comment="">
+							</SubAppEvent>
+						</SubAppEventInputs>
+						<SubAppEventOutputs>
+							<SubAppEvent Name="PALLET_IN_CONVEYOR" Type="Event" Comment="">
+							</SubAppEvent>
+						</SubAppEventOutputs>
+					</SubAppInterfaceList>
+				</SubApp>
+				<SubApp Name="Transfer_Conveyor" Comment="" x="4133.333333333334" y="2666.666666666667">
 					<SubAppInterfaceList>
 						<SubAppEventInputs>
 							<SubAppEvent Name="INIT" Type="Event" Comment="">
@@ -295,7 +521,7 @@
 						</SubAppEventOutputs>
 					</SubAppInterfaceList>
 				</SubApp>
-				<SubApp Name="Entry_Conveyor" Comment="" x="2133.3333333333335" y="-400.0">
+				<SubApp Name="Entry_Conveyor" Comment="" x="4000.0" y="1333.3333333333335">
 					<SubAppInterfaceList>
 						<SubAppEventInputs>
 							<SubAppEvent Name="INIT" Type="Event" Comment="">
@@ -315,134 +541,31 @@
 						</SubAppEventOutputs>
 					</SubAppInterfaceList>
 				</SubApp>
-				<SubApp Name="Right_Conveyor" Comment="" x="2306.666666666667" y="2433.3333333333335">
-					<SubAppInterfaceList>
-						<SubAppEventInputs>
-							<SubAppEvent Name="INIT" Type="Event" Comment="">
-							</SubAppEvent>
-						</SubAppEventInputs>
-						<SubAppEventOutputs>
-							<SubAppEvent Name="PALLET_IN_CONVEYOR" Type="Event" Comment="">
-							</SubAppEvent>
-						</SubAppEventOutputs>
-					</SubAppInterfaceList>
-				</SubApp>
-				<SubApp Name="Left_Conveyor" Comment="" x="2306.666666666667" y="1766.6666666666667">
-					<SubAppInterfaceList>
-						<SubAppEventInputs>
-							<SubAppEvent Name="INIT" Type="Event" Comment="">
-							</SubAppEvent>
-						</SubAppEventInputs>
-						<SubAppEventOutputs>
-							<SubAppEvent Name="PALLET_IN_CONVEYOR" Type="Event" Comment="">
-							</SubAppEvent>
-						</SubAppEventOutputs>
-					</SubAppInterfaceList>
-				</SubApp>
-				<FB Name="Right_Conveyor_Status" Type="PUBLISH_0" Comment="" x="10533.333333333334" y="5733.333333333334">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,RightConveyor]&quot;"/>
-				</FB>
-				<FB Name="Get_Left_Conveyor_Status" Type="SUBSCRIBE_0" Comment="" x="11866.666666666668" y="4666.666666666667">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,LeftConveyor]&quot;"/>
-				</FB>
-				<FB Name="Left_Conveyor_Status" Type="PUBLISH_0" Comment="" x="4400.0" y="133.33333333333334">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,LeftConveyor]&quot;"/>
-				</FB>
-				<FB Name="Get_Right_Conveyor_Status" Type="SUBSCRIBE_0" Comment="" x="11866.666666666668" y="5733.333333333334">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,RightConveyor]&quot;"/>
-				</FB>
-				<FB Name="Big_Box_Notification" Type="PUBLISH_0" Comment="" x="14800.0" y="5200.0">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,BigBox]&quot;"/>
-				</FB>
-				<FB Name="Get_Small_Box_Notification" Type="SUBSCRIBE_0" Comment="" x="15866.666666666668" y="6266.666666666667">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,SmallBox]&quot;"/>
-				</FB>
-				<FB Name="Pallet_Status" Type="PUBLISH_0" Comment="" x="13466.666666666668" y="5200.0">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,PalletStatus]&quot;"/>
-				</FB>
-				<FB Name="Get_Transfer_Conveyor_Status" Type="SUBSCRIBE_0" Comment="" x="17466.666666666668" y="5200.0">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,TransferConveyor]&quot;"/>
-				</FB>
-				<FB Name="Small_Box_Notification" Type="PUBLISH_0" Comment="" x="16133.333333333334" y="5200.0">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,SmallBox]&quot;"/>
-				</FB>
-				<FB Name="Transfer_Conveyor_Status" Type="PUBLISH_0" Comment="" x="17466.666666666668" y="6266.666666666667">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,TransferConveyor]&quot;"/>
-				</FB>
-				<FB Name="Get_Big_Box_Notification" Type="SUBSCRIBE_0" Comment="" x="14666.666666666668" y="6266.666666666667">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,BigBox]&quot;"/>
-				</FB>
-				<FB Name="Get_Pallet_Status" Type="SUBSCRIBE_0" Comment="" x="13466.666666666668" y="6266.666666666667">
-					<Parameter Name="QI" Value="1"/>
-					<Parameter Name="ID" Value="&quot;fbdk[].kafka[localhost:9092,PalletStatus]&quot;"/>
-				</FB>
 				<EventConnections>
-					<Connection Source="START.COLD" Destination="Transfer_Conveyor.INIT" Comment="" dx1="646.6666666666667"/>
-					<Connection Source="START.WARM" Destination="Transfer_Conveyor.INIT" Comment="" dx1="646.6666666666667"/>
-					<Connection Source="START.COLD" Destination="Entry_Conveyor.INIT" Comment="" dx1="646.6666666666667"/>
-					<Connection Source="START.WARM" Destination="Entry_Conveyor.INIT" Comment="" dx1="646.6666666666667"/>
-					<Connection Source="START.COLD" Destination="Left_Conveyor.INIT" Comment="" dx1="733.3333333333334"/>
-					<Connection Source="START.COLD" Destination="Right_Conveyor.INIT" Comment="" dx1="733.3333333333334"/>
-					<Connection Source="START.WARM" Destination="Left_Conveyor.INIT" Comment="" dx1="733.3333333333334"/>
-					<Connection Source="START.WARM" Destination="Right_Conveyor.INIT" Comment="" dx1="733.3333333333334"/>
-					<Connection Source="Right_Conveyor.PALLET_IN_CONVEYOR" Destination="Right_Conveyor_Status.REQ" Comment="" dx1="3580.0"/>
-					<Connection Source="Get_Left_Conveyor_Status.INITO" Destination="Right_Conveyor_Status.INIT" Comment="" dx1="80.0" dx2="80.0" dy="533.3333333333334"/>
-					<Connection Source="Get_Left_Conveyor_Status.IND" Destination="Entry_Conveyor.TRANSFER_COMPLETE" Comment="" dx1="80.0" dx2="80.0" dy="-2480.0"/>
-					<Connection Source="Get_Left_Conveyor_Status.IND" Destination="Transfer_Conveyor.PALLET_TRANSFERED" Comment="" dx1="80.0" dx2="80.0" dy="-1846.6666666666667"/>
-					<Connection Source="Left_Conveyor.PALLET_IN_CONVEYOR" Destination="Left_Conveyor_Status.REQ" Comment="" dx1="926.6666666666667"/>
-					<Connection Source="Left_Conveyor_Status.INITO" Destination="Get_Left_Conveyor_Status.INIT" Comment="" dx1="2386.666666666667"/>
-					<Connection Source="Right_Conveyor_Status.INITO" Destination="Get_Right_Conveyor_Status.INIT" Comment=""/>
-					<Connection Source="Get_Right_Conveyor_Status.IND" Destination="Entry_Conveyor.TRANSFER_COMPLETE" Comment="" dx1="80.0" dx2="80.0" dy="-3013.3333333333335"/>
-					<Connection Source="Get_Right_Conveyor_Status.IND" Destination="Transfer_Conveyor.PALLET_TRANSFERED" Comment="" dx1="80.0" dx2="80.0" dy="-2380.0"/>
-					<Connection Source="Entry_Conveyor.BIG_BOX" Destination="Big_Box_Notification.REQ" Comment="" dx1="5533.333333333334"/>
-					<Connection Source="Get_Small_Box_Notification.IND" Destination="Transfer_Conveyor.SMALL_BOX" Comment="" dx1="80.0" dx2="80.0" dy="-2700.0"/>
-					<Connection Source="Get_Right_Conveyor_Status.INITO" Destination="Pallet_Status.INIT" Comment="" dx1="300.0"/>
-					<Connection Source="Entry_Conveyor.PALLET_AT_EXIT" Destination="Pallet_Status.REQ" Comment="" dx1="4813.333333333334"/>
-					<Connection Source="Pallet_Status.INITO" Destination="Big_Box_Notification.INIT" Comment=""/>
-					<Connection Source="Get_Transfer_Conveyor_Status.IND" Destination="Entry_Conveyor.TRANSFER_CONV_EMPTY" Comment="" dx1="80.0" dx2="80.0" dy="-2800.0"/>
-					<Connection Source="Big_Box_Notification.INITO" Destination="Small_Box_Notification.INIT" Comment=""/>
-					<Connection Source="Entry_Conveyor.SMALL_BOX" Destination="Small_Box_Notification.REQ" Comment="" dx1="6220.0"/>
-					<Connection Source="Small_Box_Notification.INITO" Destination="Get_Transfer_Conveyor_Status.INIT" Comment=""/>
-					<Connection Source="Get_Small_Box_Notification.INITO" Destination="Transfer_Conveyor_Status.INIT" Comment=""/>
-					<Connection Source="Transfer_Conveyor.CONVEYOR_EMPTY" Destination="Transfer_Conveyor_Status.REQ" Comment="" dx1="6960.0"/>
-					<Connection Source="Get_Big_Box_Notification.INITO" Destination="Get_Small_Box_Notification.INIT" Comment=""/>
-					<Connection Source="Get_Big_Box_Notification.IND" Destination="Transfer_Conveyor.BIG_BOX" Comment="" dx1="80.0" dx2="80.0" dy="-2746.666666666667"/>
-					<Connection Source="Get_Transfer_Conveyor_Status.INITO" Destination="Get_Pallet_Status.INIT" Comment="" dx1="80.0" dx2="80.0" dy="533.3333333333334"/>
-					<Connection Source="Get_Pallet_Status.INITO" Destination="Get_Big_Box_Notification.INIT" Comment=""/>
-					<Connection Source="Get_Pallet_Status.IND" Destination="Transfer_Conveyor.PALLET_ARRIVED" Comment="" dx1="80.0" dx2="80.0" dy="-2800.0"/>
-					<Connection Source="START.COLD" Destination="Left_Conveyor_Status.INIT" Comment="" dx1="1833.3333333333335"/>
-					<Connection Source="START.WARM" Destination="Left_Conveyor_Status.INIT" Comment="" dx1="1833.3333333333335"/>
+					<Connection Source="Left_Conveyor.PALLET_IN_CONVEYOR" Destination="Transfer_Conveyor.PALLET_TRANSFERED" Comment="" dx1="740.0"/>
+					<Connection Source="Right_Conveyor.PALLET_IN_CONVEYOR" Destination="Transfer_Conveyor.PALLET_TRANSFERED" Comment="" dx1="740.0"/>
+					<Connection Source="Transfer_Conveyor.CONVEYOR_EMPTY" Destination="Entry_Conveyor.TRANSFER_CONV_EMPTY" Comment="" dx1="80.0" dx2="80.0" dy="-613.3333333333334"/>
+					<Connection Source="Left_Conveyor.PALLET_IN_CONVEYOR" Destination="Entry_Conveyor.TRANSFER_COMPLETE" Comment="" dx1="673.3333333333334"/>
+					<Connection Source="Right_Conveyor.PALLET_IN_CONVEYOR" Destination="Entry_Conveyor.TRANSFER_COMPLETE" Comment="" dx1="673.3333333333334"/>
+					<Connection Source="Entry_Conveyor.PALLET_AT_EXIT" Destination="Transfer_Conveyor.PALLET_ARRIVED" Comment="" dx1="80.0" dx2="80.0" dy="713.3333333333334"/>
+					<Connection Source="Entry_Conveyor.BIG_BOX" Destination="Transfer_Conveyor.BIG_BOX" Comment="" dx1="80.0" dx2="80.0" dy="713.3333333333334"/>
+					<Connection Source="Entry_Conveyor.SMALL_BOX" Destination="Transfer_Conveyor.SMALL_BOX" Comment="" dx1="80.0" dx2="80.0" dy="713.3333333333334"/>
+					<Connection Source="START.COLD" Destination="Entry_Conveyor.INIT" Comment="" dx1="1580.0"/>
+					<Connection Source="START.WARM" Destination="Entry_Conveyor.INIT" Comment="" dx1="1580.0"/>
+					<Connection Source="START.COLD" Destination="Left_Conveyor.INIT" Comment="" dx1="313.33333333333337"/>
+					<Connection Source="START.WARM" Destination="Left_Conveyor.INIT" Comment="" dx1="313.33333333333337"/>
+					<Connection Source="START.COLD" Destination="Right_Conveyor.INIT" Comment="" dx1="313.33333333333337"/>
+					<Connection Source="START.WARM" Destination="Right_Conveyor.INIT" Comment="" dx1="313.33333333333337"/>
+					<Connection Source="START.COLD" Destination="Transfer_Conveyor.INIT" Comment="" dx1="1646.6666666666667"/>
+					<Connection Source="START.WARM" Destination="Transfer_Conveyor.INIT" Comment="" dx1="1646.6666666666667"/>
 				</EventConnections>
 			</FBNetwork>
 		</Resource>
 	</Device>
-	<Mapping From="sorting_by_height_basicApp.Transfer_Conveyor" To="VM_Ubuntu.EMB_RES.Transfer_Conveyor"/>
-	<Mapping From="sorting_by_height_basicApp.Entry_Conveyor" To="VM_Ubuntu.EMB_RES.Entry_Conveyor"/>
-	<Mapping From="sorting_by_height_basicApp.Right_Conveyor" To="VM_Ubuntu.EMB_RES.Right_Conveyor"/>
-	<Mapping From="sorting_by_height_basicApp.Left_Conveyor" To="VM_Ubuntu.EMB_RES.Left_Conveyor"/>
-	<Mapping From="sorting_by_height_basicApp.Right_Conveyor_Status" To="VM_Ubuntu.EMB_RES.Right_Conveyor_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Get_Left_Conveyor_Status" To="VM_Ubuntu.EMB_RES.Get_Left_Conveyor_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Left_Conveyor_Status" To="VM_Ubuntu.EMB_RES.Left_Conveyor_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Get_Right_Conveyor_Status" To="VM_Ubuntu.EMB_RES.Get_Right_Conveyor_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Big_Box_Notification" To="VM_Ubuntu.EMB_RES.Big_Box_Notification"/>
-	<Mapping From="sorting_by_height_basicApp.Get_Small_Box_Notification" To="VM_Ubuntu.EMB_RES.Get_Small_Box_Notification"/>
-	<Mapping From="sorting_by_height_basicApp.Pallet_Status" To="VM_Ubuntu.EMB_RES.Pallet_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Get_Transfer_Conveyor_Status" To="VM_Ubuntu.EMB_RES.Get_Transfer_Conveyor_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Small_Box_Notification" To="VM_Ubuntu.EMB_RES.Small_Box_Notification"/>
-	<Mapping From="sorting_by_height_basicApp.Transfer_Conveyor_Status" To="VM_Ubuntu.EMB_RES.Transfer_Conveyor_Status"/>
-	<Mapping From="sorting_by_height_basicApp.Get_Big_Box_Notification" To="VM_Ubuntu.EMB_RES.Get_Big_Box_Notification"/>
-	<Mapping From="sorting_by_height_basicApp.Get_Pallet_Status" To="VM_Ubuntu.EMB_RES.Get_Pallet_Status"/>
+	<Mapping From="sorting_by_height_basic_simple.Left_Conveyor" To="VM_Ubuntu.EMB_RES.Left_Conveyor"/>
+	<Mapping From="sorting_by_height_basic_simple.Right_Conveyor" To="VM_Ubuntu.EMB_RES.Right_Conveyor"/>
+	<Mapping From="sorting_by_height_basic_simple.Transfer_Conveyor" To="VM_Ubuntu.EMB_RES.Transfer_Conveyor"/>
+	<Mapping From="sorting_by_height_basic_simple.Entry_Conveyor" To="VM_Ubuntu.EMB_RES.Entry_Conveyor"/>
 	<Segment Name="Ethernet" Type="Ethernet" Comment="" x="4520.0" y="1320.0" dx1="2000.0">
 		<Attribute Name="Color" Type="STRING" Value="132,173,214" Comment="color"/>
 	</Segment>
